@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Netlist Processing</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alata&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+        font-family: "Alata", sans-serif;
+      }
+
+      .page-container {
+        width: 100vw;
+        height: 100vh;
+        background: #eff0f2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .shadow {
+        -webkit-box-shadow: 27px 43px 43px -26px rgba(89, 89, 89, 0.39);
+        -moz-box-shadow: 27px 43px 43px -26px rgba(89, 89, 89, 0.39);
+        box-shadow: 27px 43px 43px -26px rgba(89, 89, 89, 0.39);
+      }
+      .login-form-container {
+        background: #f5f5f5;
+        width: 860px;
+        height: 540px;
+        display: flex;
+        flex-direction: row;
+        box-shadow: 10px black;
+        border-radius: 10px;
+      }
+      .login-form-right-side {
+        width: 50%;
+        border-radius: 10px 0px 0px 10px;
+        padding: 55px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        background-image: radial-gradient(
+          ellipse farthest-corner at 0 10%,
+          #b691d2 0%,
+          #8a4ebf 70%,
+          #6e12cb 70%
+        );
+      }
+      .login-form-right-side h1 {
+        margin-bottom: 100px;
+        color: white;
+      }
+      .login-form-left-side {
+        width: 50%;
+        border-radius: 0px 10px 10px 0px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+        background: rgb(255, 255, 255);
+        background: linear-gradient(
+          287deg,
+          rgba(255, 255, 255, 1) 0%,
+          rgba(243, 244, 244, 1) 0%,
+          rgba(255, 255, 255, 1) 100%
+        );
+      }
+
+      h1 {
+        margin-top: 0;
+        color: #333;
+        text-align: center;
+      }
+
+      input[type="file"],
+      input[type="text"],
+      input[type="submit"] {
+        margin-top: 15px;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      input[type="submit"] {
+        background-color: #8a4ebf;
+        color: white;
+        cursor: pointer;
+      }
+
+      input[type="submit"]:hover {
+        background-color: #3ca9e8;
+      }
+
+      #statusText {
+        margin-left: 10px;
+        font-weight: bold;
+      }
+
+      #resultDiv {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: center;
+        display: none; /* 결과 창 숨기기 */
+      }
+
+      #resultDiv p {
+        margin: 0 0 10px;
+      }
+
+      #resultDiv a {
+        color: #0645ad;
+        text-decoration: none;
+      }
+      .container {
+        margin-top: 200px;
+        height: 500px;
+      }
+      label {
+        font-family: Helvetica, Arial, sans-serif;
+      }
+      .custom-file-input {
+        display: inline-block;
+        background-color: #fbfcfc;
+        color: #000;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .custom-file-input .file-name {
+        margin-left: 10px;
+        font-size: 12px;
+      }
+
+      .filebox .upload-name {
+        display: inline-block;
+        height: 40px;
+        padding: 0 10px;
+        vertical-align: middle;
+        border: 1px solid #dddddd;
+        width: 78%;
+        color: #999999;
+      }
+      .filebox label {
+        display: inline-block;
+        padding: 10px 20px;
+        color: #fff;
+        vertical-align: middle;
+        background-color: #999999;
+        cursor: pointer;
+        height: 40px;
+        margin-left: 10px;
+        background-color: #f9f9f9;
+      }
+      .filebox input[type="file"] {
+        background-color: #f9f9f9;
+        position: absolute;
+        width: 0;
+        height: 0;
+        padding: 0;
+        overflow: hidden;
+        border: 0;
+      }
+      .login-form-left-side h1 {
+        margin-bottom: 100px;
+      }
+      hr {
+        border: #8a4ebf 1px solid;
+      }
+      .login-btn-wrap {
+        margin-top: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .login-btn-wrap .login-btn {
+        width: 95px;
+        height: 35px;
+        color: white;
+        border: 0;
+        border-radius: 4px;
+
+        background: #9b9dc6;
+        background: linear-gradient(
+          162deg,
+          #b691d2 0%,
+          #8a4ebf 70%,
+          #6e12cb 70%
+        );
+      }
+      .login-btn-wrap a {
+        margin-top: 10px;
+        text-decoration: none;
+        font-size: 11px;
+        color: gray;
+      }
+      #executeButton {
+        width: 95px;
+        height: 35px;
+        color: white;
+        border: 0;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        display: block;
+        margin-top: 10px;
+        background: #9b9dc6;
+        background: linear-gradient(
+          162deg,
+          #b691d2 0%,
+          #8a4ebf 70%,
+          #6e12cb 70%
+        );
+      }
+      #loadingSpinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .inputs {
+        border-radius: 20px;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #ccc;
+        border-top-color: #666;
+        border-radius: 50%;
+        animation: spin 1s infinite linear;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-container">
+      <div class="login-form-container shadow">
+        <div class="login-form-right-side">
+          <h1>NetList Data Extractor</h1>
+        </div>
+        <div class="login-form-left-side">
+          <h1>Netlist Processing</h1>
+          <form id="myForm" method="POST" enctype="multipart/form-data">
+            <label for="netlistFile" class="custom-file-input">
+              <span class="file-label"
+                >NET:<span class="file-name">No file selected</span></span
+              >
+            </label>
+            <input
+              type="file"
+              id="netlistFile"
+              name="netlist_file"
+              style="display: none"
+            />
+            <hr />
+            <label for="bomFile" class="custom-file-input">
+              <span class="file-label"
+                >BOM:<span class="file-name">No file selected</span></span
+              >
+            </label>
+            <input
+              type="file"
+              id="bomFile"
+              name="Bom_file"
+              style="display: none"
+            />
+            <hr />
+            <input
+              type="text"
+              name="instance_name"
+              placeholder="Search instance"
+              class="inputs"
+            /><br />
+
+            <input id="executeButton" type="submit" value="Start" />
+          </form>
+          <div id="loadingSpinner" style="display: none">
+            <div class="spinner"></div>
+          </div>
+          <div id="resultDiv"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      $(document).ajaxStart(function () {
+        $("#loadingSpinner").show(); // 로딩 스피너 보이기
+        $("#resultDiv").hide(); // 결과 창 숨기기
+      });
+
+      $(document).ajaxStop(function () {
+        $("#loadingSpinner").hide(); // 로딩 스피너 숨기기
+        $("#resultDiv").show(); // 결과 창 보이기
+      });
+
+      $("#netlistFile, #bomFile").on("change", function () {
+        var fileName = $(this).prop("files")[0].name;
+        $(this).prev(".custom-file-input").find(".file-name").text(fileName);
+      });
+
+      $("#myForm").on("submit", function (e) {
+        e.preventDefault();
+
+        $("#executeButton").val("Loading");
+        $("#loadingSpinner").show();
+
+        $.ajax({
+          type: "POST",
+          url: "/",
+          data: new FormData(this),
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.result === "success") {
+              var downloadLink = $("<a>")
+                .attr("href", response.download_link)
+                .attr(
+                  "download",
+                  response.download_link.substring(
+                    response.download_link.lastIndexOf("/") + 1
+                  )
+                )
+                .text(
+                  response.download_link.substring(
+                    response.download_link.lastIndexOf("/") + 1
+                  )
+                );
+
+              var resultDiv = $("#resultDiv");
+              resultDiv.empty();
+              resultDiv.append("<p>Result:</p>").append(downloadLink);
+
+              executionStatus = "Start";
+              $("#executeButton").val(executionStatus);
+              $("#loadingSpinner").hide();
+            } else {
+              var resultDiv = $("#resultDiv");
+              resultDiv.empty();
+              resultDiv.text("IC PIN 목록 생성 실패");
+
+              executionStatus = "Start";
+              $("#executeButton").val(executionStatus);
+            }
+          },
+          error: function () {
+            var resultDiv = $("#resultDiv");
+            resultDiv.empty();
+            resultDiv.text("IC PIN 목록 생성 실패");
+
+            executionStatus = "Start";
+            $("#executeButton").val(executionStatus);
+            $("#loadingSpinner").hide();
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
